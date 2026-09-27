@@ -23,7 +23,7 @@ dot -Tpng -o docs/schema.png docs/schema.dot
 dot -Tsvg -o docs/schema.svg docs/schema.dot
 ```
 
-Blue = mock path, orange = hardware path, center = shared engine.
+Read left to right: a run starts, the AI mutation loop crafts messages, sends them to a real or mock charging station, and writes a report. The dashed arrow is the loop learning from each response.
 
 ## 1. Component Map
 
