@@ -1,10 +1,33 @@
 # EVCC-SIFT-Mutator ⚡🛡️
 
-> **Search-Based Protocol Mutation, Self-Healing Fuzzing Harness, and Procedural Decision Graph for ISO 15118 / DIN SPEC 70121 EV Fast Charging Security Auditing.**
+> **A protocol mutation framework for charging-system conformance testing and benchmarking.**
 
 Developed for the **YFN x EU Energy Hackathon (Munich, 2026)** — EnBW Track: *AI-Assisted Penetration Testing of Fast-Charging Infrastructure*.
 
 ---
+
+## Start With Simulation
+
+The included `SeccMockServer` runs entirely offline. It models selected charging
+states and boundary responses using Python objects and a JSON-based simulated
+codec. It does not emulate a physical charger, real EXI, PLC, or CAN.
+
+```bash
+uv sync --extra dev
+uv run pytest
+uv run python run_fuzzer.py --mode mock --no-mutations --cycles 5
+```
+
+See [SIMULATION.md](SIMULATION.md) for verified upstream simulator options
+(Josev/`iso15118`, EVerest, and pyPLC) and the division between simulation,
+CLIProxyAPI model access, and Colab execution. The
+[benchmark notebook](notebooks/mutation_benchmark.ipynb) records isolated mock
+request/response trials without interpreting rejection as a confirmed defect.
+
+The legacy mock CLI/report below retains its historical security-oriented
+labels and heuristics. Its generated CVE/CWE descriptions are not validated
+findings. Use the notebook for measured offline benchmark evidence; the new
+hardware path also writes observations rather than inferred vulnerability claims.
 
 ## 🌟 Executive Overview
 
@@ -71,9 +94,9 @@ Using `uv` (recommended) or standard `pip`:
 git clone https://github.com/JavaStudentAlex/evcc-sift-mutator.git
 cd evcc-sift-mutator
 
-# Install dependencies
-uv sync --all-extras
-# or: pip install -e ".[dev,hardware]"
+# Install offline testing dependencies
+uv sync --extra dev
+# or: pip install -e ".[dev]"
 ```
 
 ### 2. Run Local Fuzzing in Mock Mode (No Hardware Required)
@@ -105,12 +128,23 @@ Output:
 When plugged into the real charging station test bench:
 
 ```bash
-# Bring up SocketCAN interface (if using Linux vcan or peak/ixxat driver)
-sudo ip link set can0 up type can bitrate 500000
+# Install the optional connection stack; the EXI codec also needs Java
+uv sync --extra dev --extra hardware
 
-# Execute live fuzzer against the physical charger
-uv run python run_fuzzer.py --mode hardware --channel can0 --cycles 10
+# Use the fixture's actual network, CAN and bitrate settings
+uv run python run_fuzzer.py --mode hardware \
+  --config connection/local_config.example.json \
+  --cycles 1 --current-demand-cycles 3 --no-mutations \
+  --report reports/hardware-baseline.md
 ```
+
+Hardware mode now uses CAN CP/PP, SLAC, SDP, TCP/TLS and the vendored DIN
+sequencer. It checks dependencies before opening devices. The reference analyzer
+CAN bus uses 1000000 bit/s; verify the setting for the actual fixture. Details,
+mutation options and exit codes are in [connection/README.md](connection/README.md).
+The bridge has offline fake-device coverage; it has not been verified against a
+physical charger here. Direct connection to a standalone software SECC is still
+a separate integration step.
 
 ---
 

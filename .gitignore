@@ -45,3 +45,5 @@ pcaps/
 *.swp
 *.swo
 .DS_Store
+.omx/
+connection/local_config.json

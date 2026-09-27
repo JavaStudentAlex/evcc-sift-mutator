@@ -1,0 +1,15 @@
+{
+  "network": {
+    "interface_name": "eth0",
+    "local_link_local_addr": "",
+    "interface_index": null,
+    "plc_modem_mac_hex": "00b052000001"
+  },
+  "can": {
+    "channel": "can0",
+    "bustype": "socketcan",
+    "bitrate": 1000000,
+    "r2_ohm": 1300,
+    "r3_ohm": 2740
+  }
+}

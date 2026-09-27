@@ -33,7 +33,7 @@ dependencies = [
 ]
 
 [tool.setuptools]
-packages = ["protocols", "simulator", "mutation", "procedural_graph", "oracles"]
+packages = ["protocols", "simulator", "mutation", "procedural_graph", "oracles", "connection"]
 py-modules = ["run_fuzzer"]
 
 [project.optional-dependencies]
@@ -43,9 +43,23 @@ dev = [
     "ruff>=0.1.0",
 ]
 hardware = [
-    "python-can>=4.2.0",
-    "scapy>=2.5.0",
+    # Real charger transport backend (vendored `connection/` stack). These
+    # match the upstream evcc_simulator's requirements; several may be
+    # unavailable in fully offline environments, in which case the harness
+    # degrades gracefully (see connection.capability_summary()).
+    "python-can>=4.3",   # CAN CP/PP control + J1939 telemetry (ixxat / socketcan)
+    "scapy>=2.5",        # raw Ethernet frames for SLAC
+    "pyslac>=0.8.3",     # HomePlug Green PHY SLAC message codecs
+    "iso15118",          # spec-compliant EXI codec (pulls py4j; needs a Java runtime)
+    "marshmallow>=3.13,<4",
 ]
 
 [project.scripts]
 evcc-fuzzer = "run_fuzzer:main"
+
+[tool.pytest.ini_options]
+# The test modules import the top-level packages directly (e.g.
+# `from mutation.bandit import ...`). Put the repo root on sys.path so the
+# documented `uv run pytest` works without an editable install of the project.
+pythonpath = ["."]
+testpaths = ["tests"]
