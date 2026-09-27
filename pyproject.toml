@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evcc-sift-mutator"
+version = "0.1.0"
+description = "Search-based protocol mutation, self-healing fuzzing harness, and procedural decision graph for ISO 15118 / DIN SPEC 70121 EV fast charging security testing."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [
+    { name = "Oleksandr Tarasov", email = "tarasov.oleksander@gmail.com" }
+]
+keywords = [
+    "ev-charging",
+    "iso15118",
+    "din70121",
+    "v2g",
+    "fuzzing",
+    "sbst",
+    "stellar",
+    "sift",
+    "multi-armed-bandit",
+    "penetration-testing",
+    "enbw",
+    "cybersecurity"
+]
+dependencies = [
+    "pydantic>=2.0.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+]
+
+[tool.setuptools]
+packages = ["protocols", "simulator", "mutation", "procedural_graph", "oracles"]
+py-modules = ["run_fuzzer"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.1.0",
+]
+hardware = [
+    "python-can>=4.2.0",
+    "scapy>=2.5.0",
+]
+
+[project.scripts]
+evcc-fuzzer = "run_fuzzer:main"

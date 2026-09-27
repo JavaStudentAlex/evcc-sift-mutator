@@ -1,0 +1,30 @@
+{
+  "name": "Procedural_EVCC_SIFT_Graph_v1",
+  "version": "1.0.0",
+  "exploration_c": 1.414,
+  "max_retries": 3,
+  "candidate_pool_size": 3,
+  "reward_weights": {
+    "emergency_shutdown": 10.0,
+    "sequence_error": 5.0,
+    "wrong_parameter": 4.0,
+    "abnormal_response": 2.0,
+    "successful_repair": 1.0
+  },
+  "enabled_arms": [
+    "ARM_NUMERICAL_BOUNDARY",
+    "ARM_SEQUENCE_INVERSION",
+    "ARM_SEMANTIC_SPOOF",
+    "ARM_SLAC_ATTENUATION"
+  ],
+  "nodes": [
+    {"id": "Node_StateInspection", "type": "Analyzer", "description": "Evaluates EVCC state machine position and SECC history"},
+    {"id": "Node_BanditSelect", "type": "UCB1Selector", "description": "Balances exploration vs exploitation over mutation arms"},
+    {"id": "Node_CandidateGen", "type": "Generator", "description": "Spawns N diverse test vectors for the selected arm"},
+    {"id": "Node_SelfHealing", "type": "Validator", "description": "Enforces schema constraints, catching tracebacks and self-healing"},
+    {"id": "Node_SIFTJudge", "type": "BradleyTerryRanker", "description": "Runs pairwise tournament ranking over candidate pool"},
+    {"id": "Node_HardwareDispatch", "type": "Transmitter", "description": "Transmits winning candidate to IXXAT CAN / SECC testbed"},
+    {"id": "Node_OracleEvaluate", "type": "Scorer", "description": "Detects behavioral distress signals and calculates reward"},
+    {"id": "Node_BanditUpdate", "type": "Optimizer", "description": "Propagates rewards back into the multi-armed bandit distribution"}
+  ]
+}
