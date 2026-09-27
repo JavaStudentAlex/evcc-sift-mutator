@@ -1,0 +1,84 @@
+digraph EVCC_SIFT_Schema {
+  graph [rankdir=LR, fontname="Helvetica", fontsize=12, labelloc="t",
+         label="EVCC-SIFT-Mutator - As-Built Framework Schema",
+         nodesep=0.35, ranksep=0.85, dpi=150, bgcolor="white", pad=0.3];
+  node  [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=10,
+         fillcolor="#eef2f7", color="#5b6b7b", penwidth=1.1, margin="0.12,0.07"];
+  edge  [fontname="Helvetica", fontsize=9, color="#7b8794"];
+
+  CLI [label="run_fuzzer.py\n(CLI / argparse)", fillcolor="#dfe7f0",
+       style="rounded,filled,bold", penwidth=1.6];
+
+  subgraph cluster_mut {
+    label="mutation/  -  search engine (deterministic)";
+    style="rounded,filled"; color="#c9d6e5"; fillcolor="#f6f9fc"; fontsize=10;
+    BANDIT [label="UCB1Bandit\n4 arms (2 active)"];
+    OPS    [label="operators\nnumeric / semantic"];
+    HEAL   [label="SelfHealingEngine\nretries = 3"];
+    JUDGE  [label="SIFT judge\nBradley-Terry (heuristic)"];
+    LLM    [label="SafeLLMClient + prompts\n(present, not called offline)",
+            style="rounded,filled,dashed", fillcolor="#f0f0f0", color="#aab0b8"];
+  }
+
+  PFG [label="ProceduralFuzzingGraph  -  8-node cycle\l1 Inspect  >  2 BanditSelect  >  3 GenPool(3)\l4 SelfHeal  >  5 SIFT  >  6 Dispatch(once)\l7 Reward  >  8 BanditUpdate\l",
+         fillcolor="#e7eef7", penwidth=1.4];
+
+  subgraph cluster_sim {
+    label="simulator/";
+    style="rounded,filled"; color="#c9d6e5"; fillcolor="#f6f9fc"; fontsize=10;
+    SM     [label="typed EVCC FSM\nIso15118EvccStateMachine"];
+    HOOKS  [label="GLOBAL_HOOKS\npre_send / post_receive / state"];
+    MOCK   [label="SeccMockServer\n(offline SECC model)", fillcolor="#d7e9db"];
+    HWRUN  [label="hardware_runner\nrun_hardware_session", fillcolor="#fbe3cf"];
+    BRIDGE [label="real_transport\ntyped <-> DIN, AIMutationCodec", fillcolor="#fbe3cf"];
+  }
+
+  subgraph cluster_conn {
+    label="connection/  -  vendored real EVCC hands (hardware)";
+    style="rounded,filled"; color="#e2c69a"; fillcolor="#fdf6ec"; fontsize=10;
+    CAN  [label="can_control\nCP/PP over CAN"];
+    SLAC [label="slac\nEV SLAC (raw Ethernet)"];
+    SDP  [label="sdp\nSECC discovery"];
+    SESS [label="session\nV2GTP / TCP / TLS"];
+    CODEC[label="codec\nDIN EXI (needs Java)"];
+    CSM  [label="DIN sequencer\nrun_dc_session"];
+  }
+
+  subgraph cluster_orc {
+    label="oracles/";
+    style="rounded,filled"; color="#c9d6e5"; fillcolor="#f6f9fc"; fontsize=10;
+    DET   [label="ChargerErrorDetector"];
+    CVE   [label="CVEReportGenerator\n(mock report - demo)", fillcolor="#d7e9db"];
+    BENCH [label="benchmark_reporter\n(measured observations)", fillcolor="#fbe3cf"];
+  }
+
+  subgraph cluster_legend {
+    label="legend"; style="rounded"; color="#c9d6e5"; fontsize=10;
+    LM [label="mock path",     fillcolor="#d7e9db"];
+    LH [label="hardware path", fillcolor="#fbe3cf"];
+    LS [label="shared engine", fillcolor="#e7eef7"];
+    LX [label="present, not called offline",
+        style="rounded,filled,dashed", fillcolor="#f0f0f0", color="#aab0b8"];
+    LM -> LH -> LS -> LX [style=invis];
+  }
+
+  /* shared engine wiring */
+  edge [color="#5b6b7b"];
+  SM -> HOOKS; HOOKS -> PFG;
+  PFG -> BANDIT; PFG -> OPS; PFG -> HEAL; PFG -> JUDGE;
+
+  /* mock path (blue) */
+  edge [color="#2b6cb0", fontcolor="#2b6cb0", penwidth=1.4];
+  CLI -> SM   [label="--mode mock"];
+  SM  -> MOCK [label="transport_sender (typed)"];
+  MOCK -> DET; DET -> CVE;
+
+  /* hardware path (orange) */
+  edge [color="#c05621", fontcolor="#c05621", penwidth=1.4];
+  CLI  -> HWRUN  [label="--mode hardware"];
+  HWRUN -> PFG [label="reuses cycle"];
+  HWRUN -> CAN   [label="1  arm CP/PP"];
+  CAN -> SLAC; SLAC -> SDP; SDP -> SESS; SESS -> CODEC; CODEC -> CSM;
+  HWRUN -> BRIDGE; BRIDGE -> CODEC [label="wrap encode/decode\n(self-heal fallback)"];
+  HWRUN -> BENCH;
+}

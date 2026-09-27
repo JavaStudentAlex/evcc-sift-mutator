@@ -11,6 +11,20 @@ connection, or a simulated interlock is an *observation*, not a confirmed
 defect. Mock mode prints a security-styled report for demonstration; hardware
 mode writes measured observations. Neither is a conformance verdict.
 
+## Rendered Diagram
+
+![EVCC-SIFT-Mutator as-built framework schema](docs/schema.png)
+
+Source: [docs/schema.dot](docs/schema.dot) (Graphviz). Scalable copy:
+[docs/schema.svg](docs/schema.svg). Regenerate with:
+
+```bash
+dot -Tpng -o docs/schema.png docs/schema.dot
+dot -Tsvg -o docs/schema.svg docs/schema.dot
+```
+
+Blue = mock path, orange = hardware path, center = shared engine.
+
 ## 1. Component Map
 
 ```mermaid
