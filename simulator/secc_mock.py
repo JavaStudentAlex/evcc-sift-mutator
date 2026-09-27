@@ -40,13 +40,13 @@ logger = logging.getLogger("secc_mock")
 
 
 class SeccMockServer:
-    """Simulated DC Fast Charging Station Controller."""
+    """Simulated DC Fast Charging Station Controller modeled after EnBW HyperNetz 50 kW SECC."""
 
-    MAX_VOLTAGE = 1000.0  # 1000 Volts
-    MAX_CURRENT = 400.0   # 400 Amperes
-    MAX_POWER = 350000.0  # 350 kW
+    MAX_VOLTAGE = 920.0   # 920 Volts DC maximum
+    MAX_CURRENT = 150.0   # 150 Amperes DC maximum (50 kW @ 400V boost)
+    MAX_POWER = 50000.0   # 50 kW nominal
 
-    def __init__(self, evse_id: str = "DE*EBW*E12345*01"):
+    def __init__(self, evse_id: str = "DE*EBW*E50KW*01"):
         self.evse_id = evse_id
         self.active_session_id: Optional[str] = None
         self.contactor_closed: bool = False

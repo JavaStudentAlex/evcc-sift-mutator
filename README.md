@@ -118,6 +118,7 @@ uv run python run_fuzzer.py --mode hardware --channel can0 --cycles 10
 
 | Directory / File | Description |
 |---|---|
+| `HARDWARE_TESTBED.md` | **Physical Testbed Guide:** Complete documentation of the EnBW HyperNetz 50 kW charger, Comemso Multi Mobile Analyzer, wiring breakouts, and hardware connection steps. |
 | `protocols/` | Conformance models: ISO 15118-2/20 dataclasses, V2GTP header codec, HomePlug Green PHY SLAC, CAN J1939. |
 | `simulator/` | Virtual EVCC state machine (`state_machine.py`), EnBW integration hooks (`hooks.py`), `SeccMockServer`, and IXXAT hardware driver. |
 | `mutation/` | UCB1 Multi-Armed Bandit, Domain Operators, Self-Healing Validation Loop (`self_healing.py`), SIFT Pairwise Judge (`sift_judge.py`). |
